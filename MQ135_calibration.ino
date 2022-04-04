@@ -75,7 +75,7 @@
 MQ135 gasSensor = MQ135(SENSOR_PIN);
 
 int DEFAULT_TEMPERATURE = 20;
-int DEFAULT_HUMIDITY = 33;
+int DEFAULT_HUMIDITY = 30;
 
 void setup() {
   Serial.begin(115200);
@@ -91,6 +91,7 @@ void warmUpMQ135()
          float ps = (i + 1) * 0.84;
          Serial.print("_" + String((int)ps) + "%");
       }
+      gasSensor.getPPM();
       delay(1000);
    }
    Serial.println("\n--- Sensor warmed up correctly");
@@ -105,7 +106,7 @@ void calibrateMQ135()
    while (count < 180)
    {
       float rz = gasSensor.getCorrectedRZero(DEFAULT_TEMPERATURE, DEFAULT_HUMIDITY);
-      rzero_sum = rzero_sum + rz;
+      rzero_sum += rz;
       count++;
       Serial.println(String(count) + " : " + String(rzero_sum));
       Serial.println(String(rz) + "\n------------------------------");
