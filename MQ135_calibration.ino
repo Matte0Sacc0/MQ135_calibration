@@ -137,6 +137,8 @@ void calibrateMQ135()
     int count = 0;
     float r_zeros[180]; 
 
+    Serial.println("Calibrating sensor ...");
+
     while (count < 180)
     {
       float rz = gasSensor.getCorrectedRZero(DEFAULT_TEMPERATURE, DEFAULT_HUMIDITY);
@@ -148,7 +150,7 @@ void calibrateMQ135()
       delay(20000);
     }
 
-    Serial.println("Calculating the weighted mean of all the values read ... ");
+    Serial.println("Calculating the weighted mean of all the values read ...");
     float r_zero = weighted_mean(r_zeros, count);
     Serial.println("The R_Zero found after calibration is : " + String(r_zero));
 }
