@@ -81,11 +81,44 @@ void setup() {
   Serial.begin(115200);
 }
 
+float most_frequent_value(float values[], int n) {
+    // count the occurrences of each value in the array
+    int max_count = 0;
+    float max_value = 0;
+    for (int i = 0; i < n; i++) {
+        int count = 0;
+        for (int j = 0; j < n; j++) {
+            if (values[j] == values[i]) {
+                count++;
+            }
+        }
+        if (count > max_count) {
+            max_count = count;
+            max_value = values[i];
+        }
+    }
+    return max_value;
+}
+
+float weighted_mean(float values[], int n) {
+    float most_frequent = most_frequent_value(values, n);
+    
+    float sum = 0.0;
+    float weight_sum = 0.0;
+    for (int i = 0; i < n; i++) {
+        // the weight of each value gets calculate based on the attinence with the most frequent value
+        float weight = n - abs(values[i] - most_frequent);
+        sum += values[i] * weight;
+        weight_sum += weight;
+    }
+    return sum / weight_sum;
+}
+
 void warmUpMQ135()
 {
-   Serial.println("Warming up sensor: (...this operation takes 2 minutes...)");
-   for (int i = 0; i < 120; i++)
-   {
+    Serial.println("Warming up sensor: (...this operation takes 2 minutes...)");
+    for (int i = 0; i < 120; i++)
+    {
       if ((i + 1) % 5 == 0)
       {
          float ps = (i + 1) * 0.84;
@@ -93,25 +126,31 @@ void warmUpMQ135()
       }
       gasSensor.getPPM();
       delay(1000);
-   }
-   Serial.println("\n--- Sensor warmed up correctly");
+    }
+    Serial.println("\n--- Sensor warmed up correctly");
 }
 
 void calibrateMQ135()
 {
-   warmUpMQ135();
-   float rzero_sum = 0.0;
-   int count = 0;
+    warmUpMQ135();
+    float rzero_sum = 0.0;
+    int count = 0;
+    float r_zeros[180]; 
 
-   while (count < 180)
-   {
+    while (count < 180)
+    {
       float rz = gasSensor.getCorrectedRZero(DEFAULT_TEMPERATURE, DEFAULT_HUMIDITY);
+      r_zeros[count] = rz;
       rzero_sum += rz;
       count++;
       Serial.println(String(count) + " : " + String(rzero_sum));
       Serial.println(String(rz) + "\n------------------------------");
       delay(20000);
-   }
+    }
+
+    Serial.println("Calculating the weighted mean of all the values read ... ");
+    float r_zero = weighted_mean(r_zeros, count);
+    Serial.println("The R_Zero found after calibration is : " + String(r_zero));
 }
 
 void loop() {
